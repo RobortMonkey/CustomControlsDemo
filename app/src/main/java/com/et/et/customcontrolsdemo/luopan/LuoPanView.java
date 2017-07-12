@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
@@ -23,6 +24,8 @@ public class LuoPanView extends View {
     private static final int lineshort30 = 40;
     private static final int textPadd = 50;
 
+    private static final int SANNJIAOBIAN = 20;
+
     private Context context;
 
     private int defaultWidth;
@@ -33,6 +36,8 @@ public class LuoPanView extends View {
     private String SCALE = "#6c6c6c";
 
     private String SCALE30 = "#333333";
+
+    private String SANJIAO = "#0078D7";
 
 
     private String POINTER = "#333333";
@@ -53,6 +58,11 @@ public class LuoPanView extends View {
     private int mMinRadio; //最里面白色圆的半径
     private float mRingWidth; //圆环的宽度
     private Paint textPaint;
+    private Paint sanJiaoPaint;
+    private Paint sanjiaolinepaint;
+    private Paint textPaintMark;
+    private Paint locationpaint;
+    private Paint pointer;
 
 
     public LuoPanView(Context context) {
@@ -66,7 +76,7 @@ public class LuoPanView extends View {
     public LuoPanView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 //        paintInit();
-        this.context=context;
+        this.context = context;
     }
 
     @Override
@@ -130,25 +140,54 @@ public class LuoPanView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
+        mViewWidth = getMeasuredWidth();
+        mViewHeight = getMeasuredHeight();
+        mViewCenterX = mViewWidth / 2;
+        mViewCenterY = mViewHeight / 2;
+        mRectF = new RectF(mViewCenterX - mMinRadio - mRingWidth / 2, mViewCenterY - mMinRadio - mRingWidth / 2, mViewCenterX + mMinRadio + mRingWidth / 2, mViewCenterY + mMinRadio + mRingWidth / 2);
+        paintInit();
 
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        paintInit();
+
         //画默认圆环
         canvas.drawArc(mRectF, 270, 360, false, criclePaint);
 
         //绘制指针
-
+        drawZhiZheng(canvas);
 
 
         //绘制表盘
         drawBiaoPan(canvas);
 
+        //绘制坐标信息
 
+
+        Rect mTxtRect = new Rect();
+        String content = "N";
+        String contentValue ="0";
+        locationpaint.getTextBounds(content, 0, content.length(), mTxtRect);
+        canvas.drawText(content,mViewCenterX-mTxtRect.width()/2,mViewCenterY-20,locationpaint);
+        canvas.drawText(contentValue,mViewCenterX-mTxtRect.width()/2,mViewCenterY+20+mTxtRect.height(),locationpaint);
+        canvas.drawCircle(mViewCenterX+mTxtRect.width()/2+10,mViewCenterY+30,8,pointer);
+
+
+    }
+
+    private void drawZhiZheng(Canvas canvas) {
+        Path path = new Path();
+        path.moveTo(mViewCenterX - SANNJIAOBIAN / 2, mViewCenterY - radius);
+        path.lineTo(mViewCenterX + SANNJIAOBIAN / 2, mViewCenterY - radius);
+        path.lineTo(mViewCenterX, mViewCenterY - radius + SANNJIAOBIAN / 2);
+        path.close();
+
+        canvas.drawPath(path, sanJiaoPaint);
+
+
+        canvas.drawLine(mViewCenterX, mViewCenterY - radius + SANNJIAOBIAN / 2, mViewCenterX, mViewCenterY - mRingWidth, sanjiaolinepaint);
     }
 
     private void drawBiaoPan(Canvas canvas) {
@@ -188,20 +227,51 @@ public class LuoPanView extends View {
                             scalePaint);
                 }
 
-                canvas.rotate(2, mViewCenterX, mViewCenterY);
+            }
+            Rect mTxtRect = new Rect();
+            String content = "N";
+            if (i % 45 == 0) {
+                if (i % 90 == 0) {
+                    textPaintMark.setTextSize(UIUtils.dip2px(10, context));
+                    if (i == 0) {
+                        content = "N";
+                    }
+                    if (i == 90) {
+                        content = "E";
+                    }
+                    if (i == 180) {
+                        content = "S";
+                    }
+                    if (i == 270) {
+                        content = "W";
+                    }
+                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRect);
+                } else {
+                    textPaintMark.setTextSize(UIUtils.dip2px(8, context));
+                    if (i == 45) {
+                        content = "NE";
+                    }
+                    if (i == 135) {
+                        content = "SE";
+                    }
+                    if (i == 225) {
+                        content = "WS";
+                    }
+                    if (i == 315) {
+                        content = "NW";
+                    }
+                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRect);
+                }
+                canvas.drawText(content,
+                        mViewCenterX - mTxtRect.width() / 2,
+                        mViewCenterY - mMinRadio / 2 - mTxtRect.height(),
+                        textPaintMark);
             }
 
-        }
-    }
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        super.onLayout(changed, left, top, right, bottom);
-        mViewWidth = getMeasuredWidth();
-        mViewHeight = getMeasuredHeight();
-        mViewCenterX = mViewWidth / 2;
-        mViewCenterY = mViewHeight / 2;
-        mRectF = new RectF(mViewCenterX - mMinRadio - mRingWidth / 2, mViewCenterY - mMinRadio - mRingWidth / 2, mViewCenterX + mMinRadio + mRingWidth / 2, mViewCenterY + mMinRadio + mRingWidth / 2);
+            canvas.rotate(1, mViewCenterX, mViewCenterY);
+
+        }
     }
 
 
@@ -222,19 +292,44 @@ public class LuoPanView extends View {
         scalePaint30 = new Paint();
         scalePaint30.setColor(Color.parseColor(SCALE30));
         scalePaint30.setAntiAlias(true);
+
         scalePaint30.setStrokeWidth(3);
 
 
-        Paint pointer = new Paint();
-        pointer.setStrokeWidth(2);
+        pointer = new Paint();
         pointer.setAntiAlias(true);
+        pointer.setStyle(Paint.Style.STROKE);
+        pointer.setStrokeWidth(3);
         pointer.setColor(Color.parseColor(POINTER));
 
 
         textPaint = new Paint();
         textPaint.setColor(Color.parseColor(SCALE30));
         textPaint.setAntiAlias(true);
-        textPaint.setTextSize(UIUtils.dip2px(10,context));
+        textPaint.setTextSize(UIUtils.dip2px(10, context));
+
+        textPaintMark = new Paint();
+        textPaintMark.setColor(Color.parseColor(SCALE30));
+        textPaintMark.setAntiAlias(true);
+        textPaintMark.setTextSize(UIUtils.dip2px(5, context));
+
+        sanJiaoPaint = new Paint();
+        sanJiaoPaint.setColor(Color.parseColor(SANJIAO));
+        sanJiaoPaint.setAntiAlias(true);
+        sanJiaoPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+
+        sanjiaolinepaint = new Paint();
+        sanjiaolinepaint.setColor(Color.parseColor(SANJIAO));
+        sanjiaolinepaint.setAntiAlias(true);
+        sanjiaolinepaint.setStyle(Paint.Style.STROKE);
+        sanjiaolinepaint.setStrokeWidth(3);
+
+
+        locationpaint = new Paint();
+        locationpaint.setColor(Color.parseColor(SCALE30));
+        locationpaint.setAntiAlias(true);
+        locationpaint.setTextSize(UIUtils.dip2px(20, context));
     }
 
 }

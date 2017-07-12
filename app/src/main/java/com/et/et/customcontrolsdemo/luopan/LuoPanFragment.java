@@ -30,12 +30,6 @@ public class LuoPanFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_luopan, container, false);
 
         unbinder = ButterKnife.bind(this, view);
-
-
-
-
-
-
         return view;
     }
 
