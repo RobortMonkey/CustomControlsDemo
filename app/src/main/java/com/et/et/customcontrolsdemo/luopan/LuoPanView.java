@@ -7,8 +7,13 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.et.et.customcontrolsdemo.utils.UIUtils;
@@ -18,7 +23,7 @@ import com.et.et.customcontrolsdemo.utils.UIUtils;
  * @date 2017/7/10 0010 15:17
  */
 
-public class LuoPanView extends View {
+public class LuoPanView extends View implements SensorEventListener {
     private static final int specSize = 500;
     private static final int lineshort = 25;
     private static final int lineshort30 = 40;
@@ -64,6 +69,12 @@ public class LuoPanView extends View {
     private Paint locationpaint;
     private Paint pointer;
 
+    String content = "N";
+    String contentValue = "0";
+
+    private float currentValue = 0.0f;
+    private String pianZhuan;
+
 
     public LuoPanView(Context context) {
         this(context, null);
@@ -77,6 +88,17 @@ public class LuoPanView extends View {
         super(context, attrs, defStyleAttr);
 //        paintInit();
         this.context = context;
+
+
+        // 传感器管理器
+        SensorManager sm = (SensorManager) context.getSystemService(context.SENSOR_SERVICE);
+        // 注册传感器(Sensor.TYPE_ORIENTATION(方向传感器);SENSOR_DELAY_FASTEST(0毫秒延迟);
+        // SENSOR_DELAY_GAME(20,000毫秒延迟)、SENSOR_DELAY_UI(60,000毫秒延迟))
+        sm.registerListener(this,
+                sm.getDefaultSensor(Sensor.TYPE_ORIENTATION),
+                SensorManager.SENSOR_DELAY_FASTEST);
+
+
     }
 
     @Override
@@ -160,22 +182,37 @@ public class LuoPanView extends View {
         drawZhiZheng(canvas);
 
 
+        canvas.save();
+        canvas.rotate(currentValue, mViewCenterX, mViewCenterY);
         //绘制表盘
         drawBiaoPan(canvas);
+        canvas.restore();
 
         //绘制坐标信息
 
-
-        Rect mTxtRect = new Rect();
-        String content = "N";
-        String contentValue ="0";
-        locationpaint.getTextBounds(content, 0, content.length(), mTxtRect);
-        canvas.drawText(content,mViewCenterX-mTxtRect.width()/2,mViewCenterY-20,locationpaint);
-        canvas.drawText(contentValue,mViewCenterX-mTxtRect.width()/2,mViewCenterY+20+mTxtRect.height(),locationpaint);
-        canvas.drawCircle(mViewCenterX+mTxtRect.width()/2+10,mViewCenterY+30,8,pointer);
+        drawLocaltionInfo(canvas);
 
 
     }
+
+    private void drawLocaltionInfo(Canvas canvas) {
+
+        locationpaint.getTextBounds(pianZhuan, 0, pianZhuan.length(), mTxtLocaltionInfoRect);
+        canvas.drawText(content,
+                mViewCenterX - mTxtLocaltionInfoRect.width() / 2,
+                mViewCenterY - 20,
+                locationpaint);
+        canvas.drawText(pianZhuan,
+                mViewCenterX - mTxtLocaltionInfoRect.width() / 2,
+                mViewCenterY + 20 + mTxtLocaltionInfoRect.height(),
+                locationpaint);
+        canvas.drawCircle(mViewCenterX + mTxtLocaltionInfoRect.width() / 2 + 20,
+                mViewCenterY + 30, 8, pointer);
+    }
+
+    Rect mTxtValueRect = new Rect();
+    Rect mTxtLocaltionInfoRect = new Rect();
+    Rect mTxtRectValue2 = new Rect();
 
     private void drawZhiZheng(Canvas canvas) {
         Path path = new Path();
@@ -200,20 +237,20 @@ public class LuoPanView extends View {
                             mViewCenterX,
                             mViewCenterY - mMinRadio,
                             scalePaint30);
-                    Rect mTxtRect = new Rect();
+
                     String content = i + "";
-                    textPaint.getTextBounds(content, 0, content.length(), mTxtRect);
+                    textPaint.getTextBounds(content, 0, content.length(), mTxtValueRect);
                     if (i == 360 || i == 0)
 
                         canvas.drawText("0",
-                                mViewCenterX - mTxtRect.width() / 2,
+                                mViewCenterX - mTxtValueRect.width() / 2,
                                 mViewCenterY - mMinRadio - textPadd,
                                 textPaint);
                     else {
 
 
                         canvas.drawText(content,
-                                mViewCenterX - mTxtRect.width() / 2,
+                                mViewCenterX - mTxtValueRect.width() / 2,
                                 mViewCenterY - mMinRadio - textPadd,
                                 textPaint);
                     }
@@ -228,7 +265,7 @@ public class LuoPanView extends View {
                 }
 
             }
-            Rect mTxtRect = new Rect();
+
             String content = "N";
             if (i % 45 == 0) {
                 if (i % 90 == 0) {
@@ -245,7 +282,7 @@ public class LuoPanView extends View {
                     if (i == 270) {
                         content = "W";
                     }
-                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRect);
+                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRectValue2);
                 } else {
                     textPaintMark.setTextSize(UIUtils.dip2px(8, context));
                     if (i == 45) {
@@ -260,11 +297,11 @@ public class LuoPanView extends View {
                     if (i == 315) {
                         content = "NW";
                     }
-                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRect);
+                    textPaintMark.getTextBounds(content, 0, content.length(), mTxtRectValue2);
                 }
                 canvas.drawText(content,
-                        mViewCenterX - mTxtRect.width() / 2,
-                        mViewCenterY - mMinRadio / 2 - mTxtRect.height(),
+                        mViewCenterX - mTxtRectValue2.width() / 2,
+                        mViewCenterY - mMinRadio / 2 - mTxtRectValue2.height(),
                         textPaintMark);
             }
 
@@ -332,4 +369,48 @@ public class LuoPanView extends View {
         locationpaint.setTextSize(UIUtils.dip2px(20, context));
     }
 
+
+    //传感器报告新的值(方向改变)
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ORIENTATION) {
+            float degree = event.values[0];
+
+            float value1 = new Float(currentValue + "").intValue() + 1;
+            float value2 = new Float(currentValue + "").intValue() - 1;
+            if ((360 - degree) < value1 && (360 - degree) > value2) {
+                return;
+            } else {
+                currentValue = 360 - degree;
+
+
+            if (0 < currentValue && currentValue < 22 || 338 < currentValue && currentValue < 360)
+                content = "N";
+            if (22 < currentValue && currentValue < 67)
+                content = "NW";
+            if (76 < currentValue && currentValue < 112)
+                content = "W";
+            if (112 < currentValue && currentValue < 157)
+                content = "SW";
+            if (157 < currentValue && currentValue < 202)
+                content = "S";
+            if (202 < currentValue && currentValue < 247)
+                content = "SE";
+            if (247 < currentValue && currentValue < 292)
+                content = "E";
+            if (292 < currentValue && currentValue < 335)
+                content = "NE";
+
+
+            pianZhuan = new Float(degree).intValue() + "";
+
+            postInvalidate();
+            }
+
+        }
+    }
+
+    //传感器精度的改变
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
 }
