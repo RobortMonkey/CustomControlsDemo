@@ -33,6 +33,11 @@ public class MainActivity extends AppCompatActivity {
         luopan.setName("指南针控件");
         list.add(luopan);
 
+        Bean quxian = new Bean();
+        quxian.setClassName("quxian");
+        quxian.setName("曲线图");
+        list.add(quxian);
+
 
         ListViewAdapter adapter = new ListViewAdapter(this, list);
         listview.setAdapter(adapter);

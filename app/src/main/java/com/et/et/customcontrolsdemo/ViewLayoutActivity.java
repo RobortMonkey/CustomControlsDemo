@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
 import com.et.et.customcontrolsdemo.luopan.LuoPanFragment;
+import com.et.et.customcontrolsdemo.qunxiantu.QuXianFragment;
 
 /**
  * @author wangxiongfeng
@@ -33,6 +34,9 @@ public class ViewLayoutActivity extends AppCompatActivity {
         switch (name) {
             case "luopan":
                 fragment = new LuoPanFragment();
+                break;
+            case "quxian":
+                fragment = new QuXianFragment();
                 break;
 
         }
