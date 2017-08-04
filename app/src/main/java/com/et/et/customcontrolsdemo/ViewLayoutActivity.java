@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 
+import com.et.et.customcontrolsdemo.donghua.DongHuaFragment;
 import com.et.et.customcontrolsdemo.luopan.LuoPanFragment;
 import com.et.et.customcontrolsdemo.qunxiantu.QuXianFragment;
 
@@ -37,6 +38,9 @@ public class ViewLayoutActivity extends AppCompatActivity {
                 break;
             case "quxian":
                 fragment = new QuXianFragment();
+                break;
+            case "dongHua":
+                fragment = new DongHuaFragment();
                 break;
 
         }

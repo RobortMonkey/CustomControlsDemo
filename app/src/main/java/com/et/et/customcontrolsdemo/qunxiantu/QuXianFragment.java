@@ -49,7 +49,7 @@ public class QuXianFragment extends Fragment {
                         String result = locationInfo.toString();
                         weathInfo.setText(result);
                     }
-                }, "101280601");
+                }, "101010100");
 
         unbinder = ButterKnife.bind(this, view);
         return view;

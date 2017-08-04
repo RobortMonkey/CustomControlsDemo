@@ -13,10 +13,10 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import com.et.et.customcontrolsdemo.utils.UIUtils;
+
 
 /**
  * @author wangxiongfeng

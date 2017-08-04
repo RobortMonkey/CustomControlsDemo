@@ -4,9 +4,6 @@ import android.content.Context;
 
 /**
  * 
- * @author huozhenpeng
- * www.miduo.com
- * 2015-4-18
  *
  */
 public class UIUtils {

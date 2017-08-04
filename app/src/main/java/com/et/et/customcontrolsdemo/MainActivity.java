@@ -41,6 +41,11 @@ public class MainActivity extends AppCompatActivity {
         quxian.setName("天气");
         list.add(quxian);
 
+        Bean dongHua = new Bean();
+        quxian.setClassName("dongHua");
+        quxian.setName("动画");
+        list.add(dongHua);
+
 
         ListViewAdapter adapter = new ListViewAdapter(this, list);
         listview.setAdapter(adapter);
@@ -60,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
         });
         requestIntent();
     }
+
     protected void requestIntent() {
         if (!(ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) == PackageManager.PERMISSION_GRANTED)) {
 
