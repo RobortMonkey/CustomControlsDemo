@@ -194,7 +194,9 @@ public class LuoPanView extends View implements SensorEventListener {
 
 
     }
-
+    Rect mTxtValueRect = new Rect();
+    Rect mTxtLocaltionInfoRect = new Rect();
+    Rect mTxtRectValue2 = new Rect();
     private void drawLocaltionInfo(Canvas canvas) {
 
         locationpaint.getTextBounds(pianZhuan, 0, pianZhuan.length(), mTxtLocaltionInfoRect);
@@ -210,9 +212,7 @@ public class LuoPanView extends View implements SensorEventListener {
                 mViewCenterY + 30, 8, pointer);
     }
 
-    Rect mTxtValueRect = new Rect();
-    Rect mTxtLocaltionInfoRect = new Rect();
-    Rect mTxtRectValue2 = new Rect();
+
 
     private void drawZhiZheng(Canvas canvas) {
         Path path = new Path();

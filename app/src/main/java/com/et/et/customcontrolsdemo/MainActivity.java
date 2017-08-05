@@ -42,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
         list.add(quxian);
 
         Bean dongHua = new Bean();
-        quxian.setClassName("dongHua");
-        quxian.setName("动画");
+        dongHua.setClassName("dongHua");
+        dongHua.setName("动画");
         list.add(dongHua);
 
 
