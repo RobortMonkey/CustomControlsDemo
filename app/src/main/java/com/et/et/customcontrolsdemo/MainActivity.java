@@ -50,9 +50,6 @@ public class MainActivity extends AppCompatActivity {
         ListViewAdapter adapter = new ListViewAdapter(this, list);
         listview.setAdapter(adapter);
 
-//        Animation animation = AnimationUtils.loadAnimation(this, R.anim.);
-//        LayoutAnimationController controller =new LayoutAnimationController(animation);
-//        listview.setLayoutAnimation(controller);
 
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

@@ -2,6 +2,7 @@ package com.et.et.customcontrolsdemo.luopan;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ public class LuoPanFragment extends Fragment {
         } else if (type == 1) {
             locationService.setLocationOption(locationService.getOption());
         }
+
 
 
         return view;

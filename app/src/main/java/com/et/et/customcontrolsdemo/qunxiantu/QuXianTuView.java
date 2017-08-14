@@ -19,6 +19,8 @@ public class QuXianTuView extends View {
     private static final String XYPAINT_COLOR = "#333333";
     private static final float XYPAINT_WIDTH = 1.0f;
     private Context context;
+    private int width;
+    private int height;
 
     public QuXianTuView(Context context) {
         this(context, null);
@@ -43,11 +45,21 @@ public class QuXianTuView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+
+
+
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        this.width = w;
+        this.height = h;
+
+
+
+
+
     }
 
     private void paintInit() {
@@ -63,6 +75,9 @@ public class QuXianTuView extends View {
         markPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         markPaint.setTextSize(UIUtils.dip2px(5, context));
         markPaint.setColor(Color.parseColor(XYPAINT_COLOR));
+
+
+
 
     }
 
