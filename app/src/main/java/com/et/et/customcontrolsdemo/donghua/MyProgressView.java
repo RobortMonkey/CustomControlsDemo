@@ -32,7 +32,7 @@ public class
 MyProgressView extends View {
     private boolean isMeasure = false;
 
-    private int levelLine;
+    private float levelLine;
     private int viewWidth;
     private int viewHeight;
     private float waveHeight;
@@ -254,8 +254,12 @@ MyProgressView extends View {
             mMoveLen += SPEED;
             // 水位上升
             levelLine -= 0.1f;
-            if (levelLine < -waveHeight)
+            if (levelLine < -waveHeight){
                 levelLine = (int) -waveHeight;
+                return;
+            }
+
+            Log.i("levelLine",levelLine+"   ");
             leftSide += SPEED;
             // 波形平移
             for (int i = 0; i < mPointsList.size(); i++) {
