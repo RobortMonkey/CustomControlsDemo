@@ -44,6 +44,8 @@ MyProgressView extends View {
     private Path mWavePath;
     private MyTimerTask mTask;
     private Timer timer;
+    private int defultHeight = 200;
+    private int defultWeight = 200;
 
 
     private final static float SPEED = 5.0f;
@@ -52,6 +54,8 @@ MyProgressView extends View {
     private Canvas mCanvas;
     private Bitmap mBitmap;
     private Paint paint;
+    private Path criclePath;
+    private ValueAnimator animator;
 
     public MyProgressView(Context context) {
         this(context, null);
@@ -73,8 +77,8 @@ MyProgressView extends View {
         if (!isMeasure) {
 
             isMeasure = true;
-            viewWidth = getMeasuredWidth();
-            viewHeight = getMeasuredHeight();
+            viewWidth = measureSize(widthMeasureSpec, defultWeight);
+            viewHeight = measureSize(heightMeasureSpec, defultHeight);
 
 
             levelLine = viewHeight; //水平位
@@ -116,6 +120,29 @@ MyProgressView extends View {
         }
     }
 
+    private int measureSize(int widthMeasureSpec, int specSize) {
+        int result;
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        int size = MeasureSpec.getSize(widthMeasureSpec);
+
+        if (mode == MeasureSpec.EXACTLY) {
+            // We were told how big to be
+            result = getDefaultWidth();
+        } else {
+            result = getDefaultWidth();//最大尺寸模式，getDefaultWidth方法需要我们根据控件实际需要自己实现
+            if (mode == MeasureSpec.AT_MOST) {
+                result = Math.max(size, specSize);
+            }
+        }
+        return result;
+    }
+
+    public int getDefaultWidth() {
+
+
+        return defultHeight;
+    }
+
     private void initPaint() {
 
 
@@ -139,16 +166,30 @@ MyProgressView extends View {
 
         // 曲线路径
         mWavePath = new Path();
+        criclePath = new Path();
 
+        // 动画驱动 初始化
+        initAnimation();
+    }
+
+    private void initAnimation() {
+        animator = ValueAnimator.ofInt(0, 1).setDuration(1000 * 60);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float animatedFraction = animator.getAnimatedFraction();
+
+                // 记录平移总位移
+                setProgress(animatedFraction * 100);
+
+            }
+        });
     }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
         //数据初始化
-
-
     }
 
     private PorterDuffXfermode mMode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
@@ -157,19 +198,14 @@ MyProgressView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mBitmap.eraseColor(Color.parseColor("#00000000"));
-//        mPaint.setXfermode(mMode);
-//        dst
-//        mCanvas.drawCircle(viewWidth / 2, viewHeight / 2, viewHeight / 2, mPaint);
-//       src
 
         //裁剪成圆区域
-        Path path = new Path();
-        canvas.save();
-        path.reset();
-        canvas.clipPath(path);
-        path.addCircle(viewWidth / 2, viewHeight / 2, viewHeight / 2, Path.Direction.CCW);
-        canvas.clipPath(path, Region.Op.REPLACE);
 
+        canvas.save();
+        criclePath.reset();
+        canvas.clipPath(criclePath);
+        criclePath.addCircle(viewWidth / 2, viewHeight / 2, viewHeight / 2, Path.Direction.CCW);
+        canvas.clipPath(criclePath, Region.Op.REPLACE);
         drawWave();
         canvas.drawBitmap(mBitmap, 0, 0, null);
         canvas.restore();
@@ -194,36 +230,14 @@ MyProgressView extends View {
     }
 
 
-//    private void flowingAnimation(){
-//        ObjectAnimator animator = ObjectAnimator.ofFloat(this,"wave",0,100)
-//                .setDuration(100);
-//        animator.setRepeatCount(INFINITE);
-//        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//            @Override
-//            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-//
-//                // 记录平移总位移
-//                mMoveLen += SPEED;
-//                // 水位上升
-//                levelLine -= 0.1f;
-//                if (levelLine < 0)
-//                    levelLine = 0;
-//                leftSide += SPEED;
-//
-//
-//                dx = dx + speed;
-//                shd_dx = shd_dx + speed/2;//Half the speed of the normal waves
-//
-//               ....
-//                rerefreshPoints();//更新初始化点
-//                postInvalidate();
-//            }
-//        })
-//        ;
-//        animator.start();
-//    }
-
     private void start() {
+        //Handler 刷新ui
+        startHandler();
+        // 动画刷新 ui
+        animator.start();
+    }
+
+    private void startHandler() {
         if (mTask != null) {
             mTask.cancel();
             mTask = null;
@@ -253,13 +267,12 @@ MyProgressView extends View {
             // 记录平移总位移
             mMoveLen += SPEED;
             // 水位上升
-            levelLine -= 0.1f;
-            if (levelLine < -waveHeight){
+            levelLine -= 0.5f;
+            if (levelLine < -waveHeight) {
                 levelLine = (int) -waveHeight;
                 return;
             }
 
-            Log.i("levelLine",levelLine+"   ");
             leftSide += SPEED;
             // 波形平移
             for (int i = 0; i < mPointsList.size(); i++) {
@@ -288,6 +301,41 @@ MyProgressView extends View {
 
 
     };
+    private int number = 0;
+
+    private void setProgress(float value) {
+        mMoveLen += SPEED;
+        // 水位上升
+
+        levelLine = viewHeight * (1 - value / 100);
+        Log.i("animatedFraction", levelLine + "  waveHeight" + waveHeight + "   animatedFraction" + value);
+
+
+        leftSide += SPEED;
+        // 波形平移
+        for (int i = 0; i < mPointsList.size(); i++) {
+            mPointsList.get(i).setPointX(mPointsList.get(i).getPointX() + SPEED);
+            switch (i % 4) {
+                case 0:
+                case 2:
+                    mPointsList.get(i).setPointY(levelLine);
+                    break;
+                case 1:
+                    mPointsList.get(i).setPointY(levelLine + waveHeight);
+                    break;
+                case 3:
+                    mPointsList.get(i).setPointY(levelLine - waveHeight);
+                    break;
+            }
+        }
+        if (mMoveLen >= waveWeight) {
+            // 波形平移超过一个完整波形后复位
+            mMoveLen = 0;
+            resetPoints();
+        }
+        Log.i("log", mMoveLen + "");
+        invalidate();
+    }
 
     private void resetPoints() {
         leftSide = -waveWeight;
@@ -306,6 +354,7 @@ MyProgressView extends View {
     }
 
     private void stop() {
-        mTask.cancel();
+//        mTask.cancel();
+        animator.cancel();
     }
 }
